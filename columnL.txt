@@ -1,0 +1,24 @@
+'
+' order rows: first is column label
+' then, points, answer, question, and image file name, if any
+Loops Anyone?
+100
+The "loop-and-a-half" is a variant of this.
+What is a while loop?
+none
+200
+for(int i = 0; i <= 100; i++)                                    will continue until this is false.
+What is i <= 100?
+none
+300
+The cv in this                                                   for(int cv = 0; cv <= 100; cv++)                         statement is called this. 
+What is a control variable?
+none
+400
+Pretest style is to this as posttest style is to that.
+What is a while loop is to a do-while loop?
+none
+500
+When populating elements of a multidimensional array, use one of these.
+What is a nested loop? 
+none

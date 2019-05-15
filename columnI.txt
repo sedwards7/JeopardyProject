@@ -1,0 +1,24 @@
+'
+'
+'
+Numeric Data
+100
+This is missing from this: {byte, short, int, long, float}.
+What is double?
+none
+200
+Of these, this has the highest precision: {double, long, float}.
+What is double?
+none
+300
+This is the syntax for this:                       <variable> = <expression>;
+What is an assignment statement?
+none
+400
+Use this type of operator if you must do explicit type conversion.
+What is a typecast operator?
+none
+500
+To convert to numeric the input from the showInputDialog method of the JOptionPane class, use a class of this category.  
+What is the wrapper class?
+none

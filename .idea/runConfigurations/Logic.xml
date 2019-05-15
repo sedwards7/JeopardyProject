@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Logic" type="Application" factoryName="Application" singleton="false">
+    <option name="MAIN_CLASS_NAME" value="LogicLayer" />
+    <module name="JepardyProject" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -1,0 +1,24 @@
+'
+'
+'
+Java Details
+100
+It's missing from                                             public static main( String[] args)
+What is void?
+none
+200
+Use this method to jazzify this:                      rCubed = radius * radius * radius;
+What is Math.pow?
+none
+300
+This good old key word triggers the constructor of a class.
+What is new?
+none
+400
+The modifiers public and private both modify this.
+What is accessibility?
+none
+500
+Using the "+" for both adding numbers and concatenating strings is an example of this.
+What is the operator overloading?
+none
