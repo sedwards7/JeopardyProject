@@ -6,6 +6,7 @@ Description:A simple jeopardy game made with javafx
 IMPORTANT: scaling for windows needs to be at 100%. Got to display settings and change the scaling to 100%
 if things seem a little off. This was the setting my computer was on when program was made
  */
+import com.sun.istack.internal.NotNull;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -26,12 +27,14 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
+import static java.sql.ResultSet.*;
+
 public class LogicLayer extends Application {
 
     private String framework = "embedded";    // mode of operating (not client/server)
     private String protocol = "jdbc:derby:";  // protocol for the translation between systems
 
-    public void start (Stage primaryStage) throws SQLException
+    public void start (Stage primaryStage) throws FileNotFoundException
     {
         double xPosition = 35;
         double yPosition = 80;
@@ -44,8 +47,8 @@ public class LogicLayer extends Application {
 
         try {
             jeopardyData = getCategories(go());
-        } catch (IOException e) {
-            System.out.println("Error: Problem with the input files!");
+        } catch (SQLException e) {
+            System.out.println("Error: Problem with the database!");
             System.exit(1); // terminates the program, code other than 0 indicates abend
         }
         System.out.println(jeopardyData); // prints all of the data for the game
@@ -186,18 +189,35 @@ public class LogicLayer extends Application {
     }
 //-----------------------------------------------------------------------------------------------------------------------
     //creates the category objects from the files
-    private static ArrayList<Category> getCategories (ArrayList<ResultSet> results) throws SQLException
+    private static ArrayList<Category> getCategories (ArrayList<String> results) throws SQLException
     {
-        ResultSetMetaData resultSetMetaData = results.get(1).getMetaData( );
+        final int AQ_PAIR_COUNT = 5;
+//        AQPair[] aQPs = new AQPair[AQ_PAIR_COUNT];
+
+//        for(int i = 1; i < AQ_PAIR_COUNT * 6; i+=5)
+//        {
+//            aQPs[i] = new AQPair(Integer.parseInt(results.get(i)), // read the point value
+//                    results.get(i+1),  // read the answer
+//                    results.get(i+2),  // read the question
+//                    results.get(i+3)); // read image file name
+//        }
+
         ArrayList<Category> gameData = new ArrayList<>( );
-        while(results.get(1).next())
+        for (int j = 0; j < results.size(); j+=5)
         {
-            for(int i = 1; i <= resultSetMetaData.getColumnCount( ); i+=5) {
-                String categoryName = results.get(0).getObject(i).toString();
-                AQPair[] aQPs = readAQs(results);
-                Category aCategory = new Category(categoryName, aQPs);
-                gameData.add(aCategory);
+            AQPair[] aQPs = new AQPair[AQ_PAIR_COUNT];
+
+            for(int i = 1; i < AQ_PAIR_COUNT * 5; i+=5)
+            {
+                aQPs[i] = new AQPair(Integer.parseInt(results.get(i)), // read the point value
+                        results.get(i+1),  // read the answer
+                        results.get(i+2),  // read the question
+                        results.get(i+3)); // read image file name
             }
+            String categoryName = results.get(j);
+//            AQPair[] aQPs = readAQs(results);
+            Category aCategory = new Category(categoryName, aQPs);
+            gameData.add(aCategory);
         }
         return gameData;
     }
@@ -212,25 +232,22 @@ public class LogicLayer extends Application {
     }
 //-----------------------------------------------------------------------------------------------------------------------------
    //reads the answers and questions in string form
-    public static AQPair[] readAQs(ArrayList<ResultSet> aqs) throws SQLException
-    {
-        ResultSetMetaData resultSetMetaData = aqs.get(1).getMetaData( );
-        final int AQ_PAIR_COUNT = 5;
-        AQPair[] aQPs = new AQPair[AQ_PAIR_COUNT];
-        aqs.get(1).last();
-        int rows = aqs.get(1).getRow();
-        aqs
-        for(int i = 0; i < aqs.get(1).getRow(); i++)
-        {
-            aQPs[i] = new AQPair(Integer.parseInt(aqs.get(1).getObject(i).toString()), // read the point value
-                                 aqs.get(2).getObject(i).toString(),  // read the answer
-                                 aqs.get(3).getObject(i).toString(),  // read the question
-                                 aqs.get(4).getObject(i).toString()); // read image file name
-        }
-        return aQPs;
-    }
+//    public static AQPair[] readAQs(ArrayList<String> aqs) throws SQLException
+//    {
+//        final int AQ_PAIR_COUNT = 5;
+//        AQPair[] aQPs = new AQPair[AQ_PAIR_COUNT];
+//
+//        for(int i = 1; i < AQ_PAIR_COUNT * 6; i+=5)
+//        {
+//            aQPs[i] = new AQPair(Integer.parseInt(aqs.get(i)), // read the point value
+//                                 aqs.get(i+1),  // read the answer
+//                                 aqs.get(i+2),  // read the question
+//                                 aqs.get(i+3)); // read image file name
+//        }
+//        return aQPs;
+//    }
     //------------------------------------------------------------------------------------------------------
-    public static ArrayList<String> fileStrings () throws FileNotFoundException {
+    private static ArrayList<String> fileStrings () throws FileNotFoundException {
         String fileNames[] = {"columnA.txt", "columnB.txt", "columnC.txt", "columnD.txt", "columnE.txt", "columnF.txt",
                 "columnG.txt", "columnH.txt", "columnI.txt", "columnJ.txt", "columnL.txt", "columnM.txt"};
 
@@ -250,10 +267,9 @@ public class LogicLayer extends Application {
         fileStrings.trimToSize();
         return fileStrings;
     }
-
-    private ArrayList<ResultSet> go( ) throws FileNotFoundException
+    //---------------------------------------------------------------------------------------------------------------------
+    private ArrayList<String> go( ) throws FileNotFoundException
     {
-        ArrayList<ResultSet> resultSets = new ArrayList<>();
 
         Random myRandom = new Random(12345678L);
         System.out.println("CSC225DatabaseApp starting in " + framework + " mode");
@@ -277,8 +293,7 @@ public class LogicLayer extends Application {
         // Statements are for executin SQL
         Statement s;
 
-
-
+        ArrayList<String> results = new ArrayList<>();
         try
         {
             String dbName = "CSC225DataBase"; // the name of the database
@@ -346,28 +361,40 @@ public class LogicLayer extends Application {
 
             // A ResultSet is table of data which is usually generated by executing a statement that queries the database.
             // The SQL is like natural language -- easy to understand for the most part
-            
-            ResultSet resultSetA = s.executeQuery("SELECT category FROM jeopardy_data");
-            printResultSet(resultSetA);
 
-            ResultSet resultSetB = s.executeQuery("SELECT score FROM jeopardy_data");
-            printResultSet(resultSetB);
+            ResultSet resultSetA = s.executeQuery("SELECT * FROM jeopardy_data");
+//            printResultSet(resultSetA);
+//            ArrayList<String> results = resultSetToString(resultSetA);
+            ResultSetMetaData rsmd = resultSetA.getMetaData();
+            int columnCount = rsmd.getColumnCount();
+            while (resultSetA.next()) {
+                int i = 1;
+                while(i <= columnCount) {
+                    results.add(resultSetA.getString(i++));
+                }
+            }
 
-            ResultSet resultSetC = s.executeQuery("SELECT answer FROM jeopardy_data");
-            printResultSet(resultSetC);
+//            ResultSet resultSetB = s.executeQuery("SELECT score FROM jeopardy_data");
+//            //printResultSet(resultSetB);
+//            setOfResultStrings.addAll(resultSetToString(resultSetB));
+//
+//
+//            ResultSet resultSetC = s.executeQuery("SELECT answer FROM jeopardy_data");
+//            //printResultSet(resultSetC);
+//            setOfResultStrings.addAll(resultSetToString(resultSetC));
+//
+//
+//            ResultSet resultSetD = s.executeQuery("SELECT question FROM jeopardy_data");
+//            //printResultSet(resultSetD);
+//            setOfResultStrings.addAll(resultSetToString(resultSetD));
+//
+//
+//            ResultSet resultSetE = s.executeQuery("SELECT image FROM jeopardy_data");
+//            //printResultSet(resultSetE);
+//            setOfResultStrings.addAll(resultSetToString(resultSetE));
 
-            ResultSet resultSetD = s.executeQuery("SELECT question FROM jeopardy_data");
-            printResultSet(resultSetD);
+//            setOfResultStrings.trimToSize();
 
-            ResultSet resultSetE = s.executeQuery("SELECT image FROM jeopardy_data");
-            printResultSet(resultSetE);
-            
-            resultSets.add(resultSetA);
-            resultSets.add(resultSetB);
-            resultSets.add(resultSetC);
-            resultSets.add(resultSetD);
-            resultSets.add(resultSetE);
-            resultSets.trimToSize();
 
             // delete the table
             s.execute("drop table jeopardy_data");
@@ -385,7 +412,7 @@ public class LogicLayer extends Application {
         {
             System.out.println(e.getMessage( ));
         }
-        return resultSets;
+        return results;
     }
     //prints result set
     private void printResultSet(ResultSet resultSet) throws SQLException
@@ -404,6 +431,23 @@ public class LogicLayer extends Application {
         }
         System.out.println("...end of result set");
         System.out.println("************************************");
+    }
+    //turns result sets to arrays of strings
+    private ArrayList<String> resultSetToString(ResultSet resultSet) throws SQLException
+    {
+//        ResultSetMetaData resultSetMetaData = resultSetA.getMetaData( );
+        ArrayList<String> resultStrings = null;
+        int counter = 0;
+        // process the data in the result set
+        while (resultSet.next()) {
+            counter++;
+            for (int i = 1; i <= counter; i++) {
+                resultStrings.add(resultSet.getString("categories"));
+            }
+        }
+        resultStrings.trimToSize();
+
+        return resultStrings;
     }
 
 }
